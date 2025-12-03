@@ -45,63 +45,7 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy: ${{ github.event.head_commit.message }}'
           enable_jekyll: false
-  deploy-to-surge:
-    needs: build-and-deploy-gh-pages
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - run: npm install -g surge
-      - run: surge --project ./ --domain ${{ secrets.SURGE_DOMAIN }} --token ${{ secrets.SURGE_TOKEN }}
-  sync-biggamescript-availability-check:
-      needs: build-and-deploy-gh-pages
-      runs-on: ubuntu-latest
-      
-      steps:
-        - uses: actions/checkout@v4
-          with:
-            ref: gh-pages
-
-        - name: Configure AWS Credentials
-          uses: aws-actions/configure-aws-credentials@v4
-          with:
-            aws-access-key-id: ${{ secrets.S3_UPLOAD_AWS_ACCESS_KEY }}
-            aws-secret-access-key: ${{ secrets.S3_UPLOAD_AWS_SECRET_ACCESS_KEY }}
-            aws-region: us-west-2
-
-        - name: Deploy to S3
-          run: |
-            aws s3 cp big_game_script.js s3://ccportedgames/big_game_script.js |
-            aws s3 cp test_availability.html s3://ccportedgames/test_availability.html
-
-  deploy-to-firebase:
-    needs: build-and-deploy-gh-pages
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Build static site
-        run: bunx vite build
-
-      - name: Deploy to Firebase
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CCPORTED }}
-          channelId: live
-          projectId: ccported
-
+  
   deploy-to-github-pages:
     needs: build-and-deploy-gh-pages
     environment:
